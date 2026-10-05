@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const repoName = 'brothers-prime';
+const repoName = 'Brothers-Prime-Property';
 
 const nextConfig = {
   reactStrictMode: true,
