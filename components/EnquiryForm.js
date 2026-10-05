@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * EnquiryForm — glass enquiry form that posts to /api/enquiry.
+ * EnquiryForm — glass enquiry form that opens WhatsApp with the enquiry details.
  * Props:
  *   variant   'dark' (glass on navy) | 'light'
  *   title / subtitle  heading copy
@@ -72,7 +72,6 @@ export default function EnquiryForm({
     const data = Object.fromEntries(new FormData(form).entries());
     data.source = source;
 
-    // light client-side validation (server validates again)
     const errs = {};
     if (!data.name || data.name.trim().length < 2) errs.name = 'Please enter your name.';
     if (!/^[+()\d\s-]{7,20}$/.test(data.phone || '')) errs.phone = 'Enter a valid phone number.';
@@ -81,25 +80,29 @@ export default function EnquiryForm({
     setServerError('');
     if (Object.keys(errs).length) return;
 
+    if (status === 'sending') return;
     setStatus('sending');
+
+    const message = [
+      'Hello, I am interested in your properties.',
+      data.name ? `Name: ${data.name}` : '',
+      data.phone ? `Phone: ${data.phone}` : '',
+      data.email ? `Email: ${data.email}` : '',
+      data.interest ? `Project: ${data.interest}` : '',
+      data.message ? `Message: ${data.message}` : '',
+      `Source: ${data.source}`,
+    ]
+      .filter(Boolean)
+      .join('\n');
+
     try {
-      const res = await fetch('/api/enquiry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      const json = await res.json().catch(() => ({}));
-      if (res.ok && json.ok) {
-        setSentName(data.name.split(' ')[0]);
-        setStatus('success');
-        form.reset();
-      } else {
-        if (json.errors) setErrors(json.errors);
-        setServerError(json.error || 'Something went wrong. Please try again or contact us on WhatsApp.');
-        setStatus('error');
-      }
+      setSentName(String(data.name || '').split(' ')[0]);
+      await new Promise((resolve) => setTimeout(resolve, 450));
+      window.open(whatsappLink(message), '_blank', 'noopener,noreferrer');
+      form.reset();
+      setStatus('success');
     } catch {
-      setServerError('Network error. Please try again or contact us on WhatsApp.');
+      setServerError('Unable to open WhatsApp. Please try again or contact us directly.');
       setStatus('error');
     }
   };

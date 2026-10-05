@@ -1,9 +1,14 @@
 /** @type {import('next').NextConfig} */
+const repoName = 'brothers-prime';
+
 const nextConfig = {
   reactStrictMode: true,
 
   // GitHub Pages static deployment
   output: 'export',
+  trailingSlash: true,
+  basePath: process.env.NODE_ENV === 'production' ? `/${repoName}` : undefined,
+  assetPrefix: process.env.NODE_ENV === 'production' ? `/${repoName}/` : undefined,
 
   images: {
     unoptimized: true,

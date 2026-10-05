@@ -1,5 +1,6 @@
 import { site } from '@/lib/site';
 import { projects } from '@/lib/projects';
+export const dynamic = 'force-static';
 
 export default function sitemap() {
   const now = new Date();
